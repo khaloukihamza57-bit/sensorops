@@ -2,28 +2,33 @@
     api:
       build: ./backend
       ports:
-        -"127.0.0.1:8000:8000"
-        depends_on:
-          db:
-            condition: service_healthy
+        - "127.0.0.1:8000:8000"
 
+      environment:
+        DB_HOST: db
+        DB_NAME: ${POSTGRES_DB}
+        DB_USER: ${POSTGRES_USER}
+        DB_PASSWORD: ${POSTGRES_PASSWORD}
 
+      depends_on:
+        db:
+         condition: service_healthy
 
     db:
-
       image: postgres:17-alpine
       environment:
+        DB_HOST: db
         POSTGRES_USER: ${POSTGRES_USER}
         POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
         POSTGRES_DB: ${POSTGRES_DB}
-      volume:
-        - postgres-data:/var/lib/postgresql/data
+      volumes:
+        - postgres_data:/var/lib/postgresql/data
       healthcheck:
-        test: ["CMD-shell", "PG_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+        test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
         interval: 5s
         timeout: 3s
         retries: 10
-    
+
   volumes:
     postgres_data:
 
